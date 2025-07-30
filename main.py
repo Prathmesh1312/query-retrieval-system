@@ -14,30 +14,22 @@ from dotenv import load_dotenv
 # LangChain Imports
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_nvidia_ai_endpoints import NVIDIAEmbeddings
 from langchain_chroma import Chroma
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_openai import ChatOpenAI
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 from langchain.prompts import ChatPromptTemplate
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.documents import Document
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 
 # --- Configuration ---
 PERSIST_DIRECTORY = "./chroma_db"
 EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2" # "nvidia/embed-qa-4" or "sentence-transformers/all-MiniLM-L6-v2"
 LLM_PROVIDER = "nvidia" # Choose your LLM provider: 'google' or 'openai' or 'nvidia'
-GOOGLE_MODEL_NAME = "gemini-1.5-flash" # For Google: "gemini-1.5-flash", "gemini-pro"
-OPENAI_MODEL_NAME = "gpt-3.5-turbo" # For OpenAI: "gpt-4o", "gpt-3.5-turbo"
 NVIDIA_MODEL_NAME = "nvidia/llama-3.1-nemotron-nano-vl-8b-v1" # "mistralai/mixtral-8x7b-instruct-v0.1" or "nvidia/llama-3.1-nemotron-nano-vl-8b-v1"
 
 # --- Load environment variables ---
 load_dotenv()
-# GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
-# OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 NVIDIA_API_KEY = os.environ.get("NVIDIA_API_KEY")
 
 # --- FastAPI App Initialization ---
@@ -84,7 +76,8 @@ class IngestResponse(BaseModel):
     documents_ingested: int
 
 # --- LLM System Prompt ---
-SYSTEM_PROMPT = """
+SYSTEM_PROMPT = 
+"""
 You are an expert policy analyst. Your task is to answer questions based SOLELY on the provided policy document context.
 Do not use any outside knowledge. If the answer is not available in the provided context, state that you cannot find the answer.
 Provide concise and direct answers for each question. Your answer must be specific and include all key details such as numbers 
@@ -106,20 +99,7 @@ async def setup_rag_system():
     vector_store = Chroma(persist_directory=PERSIST_DIRECTORY, embedding_function=embeddings)
     
     llm = None
-    if LLM_PROVIDER == "google":
-        if not GOOGLE_API_KEY:
-            raise ValueError("GOOGLE_API_KEY must be set for the 'google' provider.")
-        print(f"Initializing Google Gemini LLM client: {GOOGLE_MODEL_NAME}...")
-        llm = ChatGoogleGenerativeAI(model=GOOGLE_MODEL_NAME, google_api_key=GOOGLE_API_KEY, temperature=0.0)
-    
-    elif LLM_PROVIDER == "openai":
-        if not OPENAI_API_KEY:
-            raise ValueError("OPENAI_API_KEY must be set for the 'openai' provider.")
-        print(f"Initializing OpenAI LLM client: {OPENAI_MODEL_NAME}...")
-        llm = ChatOpenAI(model=OPENAI_MODEL_NAME, api_key=OPENAI_API_KEY, temperature=0.0)
-        
-    # --- ADDED: Support for NVIDIA provider ---
-    elif LLM_PROVIDER == "nvidia":
+    if LLM_PROVIDER == "nvidia":
         if not NVIDIA_API_KEY:
             raise ValueError("NVIDIA_API_KEY must be set for the 'nvidia' provider.")
         print(f"Initializing NVIDIA LLM client: {NVIDIA_MODEL_NAME}...")

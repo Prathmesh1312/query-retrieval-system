@@ -7,9 +7,6 @@ pypdf==4.2.0
 langchain
 langchain-community
 langchain-nvidia-ai-endpoints
-pinecone-client==3.2.2
-langchain-pinecone
-pinecone
 langchain_huggingface
 langchain_chroma
 sentence-transformers
