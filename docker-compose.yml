@@ -1,0 +1,35 @@
+ersion: '3.8'
+
+services:
+  rag-api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./chroma_db:/app/chroma_db # Persist ChromaDB data
+    environment:
+      # Ensure these match the values in main.py or are overridden as needed
+      - OLLAMA_BASE_URL=http://ollama:11434 # Use the service name 'ollama'
+      - LLM_MODEL_NAME=mistral # Or 'zephyr', 'llama2'
+      - EMBEDDING_MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
+    depends_on:
+      - ollama # Ensure ollama starts before rag-api
+    networks:
+      - rag-network
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama # Persist Ollama models
+    command: serve # Start Ollama server
+    networks:
+      - rag-network
+
+volumes:
+  ollama_data:
+
+networks:
+  rag-network:
+    driver: bridge
